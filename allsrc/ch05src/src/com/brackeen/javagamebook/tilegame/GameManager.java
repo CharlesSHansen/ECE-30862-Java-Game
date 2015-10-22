@@ -44,6 +44,7 @@ public class GameManager extends GameCore {
     private GameAction moveLeft;
     private GameAction moveRight;
     private GameAction jump;
+    private GameAction fall;
     private GameAction exit;
 
 
@@ -92,6 +93,7 @@ public class GameManager extends GameCore {
     private void initInput() {
         moveLeft = new GameAction("moveLeft");
         moveRight = new GameAction("moveRight");
+        fall = new GameAction("fall", GameAction.DETECT_INITAL_PRESS_ONLY);
         jump = new GameAction("jump",
             GameAction.DETECT_INITAL_PRESS_ONLY);
         exit = new GameAction("exit",
@@ -103,7 +105,8 @@ public class GameManager extends GameCore {
 
         inputManager.mapToKey(moveLeft, KeyEvent.VK_LEFT);
         inputManager.mapToKey(moveRight, KeyEvent.VK_RIGHT);
-        inputManager.mapToKey(jump, KeyEvent.VK_SPACE);
+        inputManager.mapToKey(fall, KeyEvent.VK_DOWN);
+        inputManager.mapToKey(jump, KeyEvent.VK_UP);
         inputManager.mapToKey(exit, KeyEvent.VK_ESCAPE);
     }
 
@@ -125,6 +128,11 @@ public class GameManager extends GameCore {
             }
             if (jump.isPressed()) {
                 player.jump(false);
+            	player.setVelocityY(player.getVelocityY() - player.getMaxSpeed() / 2);
+            }
+            if (fall.isPressed()) {
+            	player.jump(false); 
+            	player.setVelocityY(player.getVelocityY() + player.getMaxSpeed() * 2);            	
             }
             player.setVelocityX(velocityX);
         }
