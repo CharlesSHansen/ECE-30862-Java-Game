@@ -11,7 +11,8 @@ public class Sprite {
     // velocity (pixels per millisecond)
     private float dx;
     private float dy;
-
+    public float health;
+    
     /**
         Creates a new Sprite object with the specified Animation.
     */
@@ -118,5 +119,13 @@ public class Sprite {
     */
     public Object clone() {
         return new Sprite(anim);
+    }
+
+    public int getHealth() {
+    	return (int) this.health;    	
+    }
+
+    public void updateHealth(float f) {
+    	health += f;
     }
 }

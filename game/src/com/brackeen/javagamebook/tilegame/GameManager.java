@@ -46,6 +46,9 @@ public class GameManager extends GameCore {
     private GameAction jump;
     private GameAction fall;
     private GameAction exit;
+    
+    private long time;
+    private long newtime;
 
 
     public void init() {
@@ -120,6 +123,7 @@ public class GameManager extends GameCore {
         Player player = (Player)map.getPlayer();
         if (player.isAlive()) {
             float velocityX = 0;
+            float velocityY = 0;
             if (moveLeft.isPressed()) {
                 velocityX-=player.getMaxSpeed();
             }
@@ -128,13 +132,29 @@ public class GameManager extends GameCore {
             }
             if (jump.isPressed()) {
                 player.jump(false);
-            	player.setVelocityY(player.getVelocityY() - player.getMaxSpeed() / 2);
+                if(player.onGround == true) {
+                velocityY = player.getVelocityY() - player.getMaxSpeed() / 2;
+                player.setVelocityY(player.getVelocityY() - player.getMaxSpeed() / 2);
+                }
             }
             if (fall.isPressed()) {
-            	player.jump(false); 
-            	player.setVelocityY(player.getVelocityY() + player.getMaxSpeed() * 2);            	
-            }
+            	player.setVelocityY(player.getVelocityY() + player.getMaxSpeed() * 2);
+            	velocityY = player.getVelocityY() + player.getMaxSpeed() * 2;
+        	}
             player.setVelocityX(velocityX);
+            if(velocityX == 0 && velocityY == 0) {
+            	newtime = System.currentTimeMillis();
+            	//System.out.println("Previous time: " + time + " New time: " + newtime);
+            	//System.out.println(newtime - time);
+            	if(newtime - time >= 1000) {
+            		time = newtime;
+                	player.updateHealth(5.0);
+            	}
+            }
+            else {
+            	player.updateHealth(0.01);
+            	time = System.currentTimeMillis();
+            }
         }
 
     }
@@ -268,8 +288,8 @@ public class GameManager extends GameCore {
 
 
         // player is dead! start map over
-        if (player.getState() == Creature.STATE_DEAD) {
-            map = resourceManager.reloadMap();
+        if (player.getState() == Creature.STATE_DEAD) {            	
+        	map = resourceManager.reloadMap();
             return;
         }
 
@@ -308,7 +328,7 @@ public class GameManager extends GameCore {
     {
 
         // apply gravity
-        if (!creature.isFlying()) {
+    	if (!creature.isFlying()) {
             creature.setVelocityY(creature.getVelocityY() +
                 GRAVITY * elapsedTime);
         }
@@ -379,7 +399,6 @@ public class GameManager extends GameCore {
         if (!player.isAlive()) {
             return;
         }
-
         // check for player collision with other sprites
         Sprite collisionSprite = getSpriteCollision(player);
         if (collisionSprite instanceof PowerUp) {
@@ -387,16 +406,21 @@ public class GameManager extends GameCore {
         }
         else if (collisionSprite instanceof Creature) {
             Creature badguy = (Creature)collisionSprite;
+            //System.out.println(canKill);
             if (canKill) {
                 // kill the badguy and make player bounce
                 soundManager.play(boopSound);
                 badguy.setState(Creature.STATE_DYING);
                 player.setY(badguy.getY() - player.getHeight());
                 player.jump(true);
+                player.updateHealth(10.0);
             }
             else {
-                // player dies!
-                player.setState(Creature.STATE_DYING);
+            	//take damage
+            	player.updateHealth(-5.0);
+            	if(player.getHealth() == 0) 
+            		player.setState(Creature.STATE_DYING);
+            	badguy.setState(Creature.STATE_DYING);
             }
         }
     }

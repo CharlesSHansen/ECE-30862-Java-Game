@@ -9,8 +9,9 @@ public class Player extends Creature {
 
     private static final float JUMP_SPEED = -.95f;
 
-    private boolean onGround;
-
+    public boolean onGround;
+    public double health = 20;
+    
     public Player(Animation left, Animation right,
         Animation deadLeft, Animation deadRight)
     {
@@ -61,5 +62,16 @@ public class Player extends Creature {
     public float getMaxSpeed() {
         return 0.5f;
     }
+    
+    public int getHealth() {
+    	return (int) this.health;    	
+    }
 
+    public void updateHealth(double d) {
+    	health += d;
+    	if (health > 40)
+    		health = 40;
+    	if (health < 0)
+    		health = 0;
+    }
 }

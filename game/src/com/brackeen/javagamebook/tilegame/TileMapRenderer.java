@@ -131,6 +131,11 @@ public class TileMapRenderer {
             Math.round(player.getX()) + offsetX,
             Math.round(player.getY()) + offsetY,
             null);
+        
+        //draw player health
+        g.setFont(new Font("TimesRoman", Font.PLAIN, 30));
+        g.setColor(Color.red);
+        g.drawString(Integer.toString((int) player.getHealth()), 50, 50);
 
         // draw sprites
         Iterator i = map.getSprites();
