@@ -1,10 +1,16 @@
 package com.brackeen.javagamebook.tilegame;
 
 import java.awt.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.Iterator;
+
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 
 import com.brackeen.javagamebook.graphics.Sprite;
 import com.brackeen.javagamebook.tilegame.sprites.Creature;
+import com.brackeen.javagamebook.tilegame.sprites.Player;
 
 /**
     The TileMapRenderer class draws a TileMap on the screen.
@@ -102,11 +108,18 @@ public class TileMapRenderer {
 
         // draw parallax background image
         if (background != null) {
+        	
+       
+        	
             int x = offsetX *
                 (screenWidth - background.getWidth(null)) /
                 (screenWidth - mapWidth);
             int y = screenHeight - background.getHeight(null);
 
+         	try {
+				g.drawImage(ImageIO.read( new File(("images/backdrop.png"))), x, y, null);
+			} catch (IOException e) {
+			}
             g.drawImage(background, x, y, null);
         }
 
@@ -131,6 +144,8 @@ public class TileMapRenderer {
             Math.round(player.getX()) + offsetX,
             Math.round(player.getY()) + offsetY,
             null);
+        System.out.println(player.getX());
+        System.out.println(player.getY());
         
         //draw player health
         g.setFont(new Font("TimesRoman", Font.PLAIN, 30));
@@ -141,8 +156,15 @@ public class TileMapRenderer {
         Iterator i = map.getSprites();
         while (i.hasNext()) {
             Sprite sprite = (Sprite)i.next();
-            int x = Math.round(sprite.getX()) + offsetX;
-            int y = Math.round(sprite.getY()) + offsetY;
+            int x, y;
+            if(sprite instanceof Player) {
+            	x = (int) sprite.getX();
+            	y = (int) sprite.getY();
+            }
+            else {
+            	x = Math.round(sprite.getX()) + offsetX;
+            	y = Math.round(sprite.getY()) + offsetY;
+            }
             g.drawImage(sprite.getImage(), x, y, null);
 
             // wake up the creature when it's on screen

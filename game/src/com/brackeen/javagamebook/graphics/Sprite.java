@@ -48,14 +48,17 @@ public class Sprite {
         Sets this Sprite's current x position.
     */
     public void setX(float x) {
-        this.x = x;
+        if(x < 0)
+        	this.x = 0;
+        else
+        	this.x = x;
     }
 
     /**
         Sets this Sprite's current y position.
     */
     public void setY(float y) {
-        this.y = y;
+		this.y = y;
     }
 
     /**
@@ -95,7 +98,12 @@ public class Sprite {
         per millisecond.
     */
     public void setVelocityX(float dx) {
-        this.dx = dx;
+    	if(this.dx > 1)
+    		this.dx = 1;
+    	else if(this.dx < -1) 
+    		this.dx = -1;
+    	else
+    		this.dx = dx;
     }
 
     /**
@@ -103,7 +111,12 @@ public class Sprite {
         per millisecond.
     */
     public void setVelocityY(float dy) {
-        this.dy = dy;
+    	if(this.dy > 1)	
+    		this.dy = 1;
+    	else if(this.dy < -1)
+    		this.dy = -1;
+    	else
+    		this.dy = dy;
     }
 
     /**

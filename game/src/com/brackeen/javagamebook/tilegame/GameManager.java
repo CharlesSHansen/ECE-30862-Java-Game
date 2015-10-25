@@ -49,8 +49,7 @@ public class GameManager extends GameCore {
     
     private long time;
     private long newtime;
-
-
+    
     public void init() {
         super.init();
 
@@ -80,6 +79,7 @@ public class GameManager extends GameCore {
             midiPlayer.getSequence("sounds/music.midi");
         midiPlayer.play(sequence, true);
         toggleDrumPlayback();
+        
     }
 
 
@@ -119,7 +119,7 @@ public class GameManager extends GameCore {
         if (exit.isPressed()) {
             stop();
         }
-
+        
         Player player = (Player)map.getPlayer();
         if (player.isAlive()) {
             float velocityX = 0;
@@ -144,15 +144,13 @@ public class GameManager extends GameCore {
             player.setVelocityX(velocityX);
             if(velocityX == 0 && velocityY == 0) {
             	newtime = System.currentTimeMillis();
-            	//System.out.println("Previous time: " + time + " New time: " + newtime);
-            	//System.out.println(newtime - time);
             	if(newtime - time >= 1000) {
             		time = newtime;
                 	player.updateHealth(5.0);
             	}
             }
             else {
-            	player.updateHealth(0.01);
+            	player.updateHealth(0.1);
             	time = System.currentTimeMillis();
             }
         }
