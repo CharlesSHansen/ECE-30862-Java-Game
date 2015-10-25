@@ -116,10 +116,10 @@ public class TileMapRenderer {
                 (screenWidth - mapWidth);
             int y = screenHeight - background.getHeight(null);
 
-         	try {
+         /*	try {
 				g.drawImage(ImageIO.read( new File(("images/backdrop.png"))), x, y, null);
 			} catch (IOException e) {
-			}
+			}*/
             g.drawImage(background, x, y, null);
         }
 
@@ -144,8 +144,6 @@ public class TileMapRenderer {
             Math.round(player.getX()) + offsetX,
             Math.round(player.getY()) + offsetY,
             null);
-        System.out.println(player.getX());
-        System.out.println(player.getY());
         
         //draw player health
         g.setFont(new Font("TimesRoman", Font.PLAIN, 30));

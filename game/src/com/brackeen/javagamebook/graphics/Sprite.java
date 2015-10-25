@@ -98,11 +98,6 @@ public class Sprite {
         per millisecond.
     */
     public void setVelocityX(float dx) {
-    	if(this.dx > 1)
-    		this.dx = 1;
-    	else if(this.dx < -1) 
-    		this.dx = -1;
-    	else
     		this.dx = dx;
     }
 
@@ -111,11 +106,6 @@ public class Sprite {
         per millisecond.
     */
     public void setVelocityY(float dy) {
-    	if(this.dy > 1)	
-    		this.dy = 1;
-    	else if(this.dy < -1)
-    		this.dy = -1;
-    	else
     		this.dy = dy;
     }
 

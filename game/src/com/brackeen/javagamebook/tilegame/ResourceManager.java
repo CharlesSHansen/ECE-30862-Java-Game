@@ -26,6 +26,7 @@ public class ResourceManager {
 	private Sprite goalSprite;
 	private Sprite grubSprite;
 	private Sprite flySprite;
+	private Sprite teleportSprite;
 
 	/**
 	 * Creates a new ResourceManager with the specified GraphicsConfiguration.
@@ -148,7 +149,10 @@ public class ResourceManager {
 					addSprite(newMap, grubSprite, x, y);
 				} else if (ch == '2') {
 					addSprite(newMap, flySprite, x, y);
+				} else if (ch == 'T') {
+					addSprite(newMap, teleportSprite, x, y);
 				}
+				
 			}
 		}
 
@@ -163,7 +167,7 @@ public class ResourceManager {
 		return newMap;
 	}
 
-	private void addSprite(TileMap map, Sprite hostSprite, int tileX, int tileY) {
+	public void addSprite(TileMap map, Sprite hostSprite, int tileX, int tileY) {
 		if (hostSprite != null) {
 			// clone the sprite from the "host"
 			Sprite sprite = (Sprite) hostSprite.clone();
@@ -259,6 +263,7 @@ public class ResourceManager {
 		flySprite = new Fly(flyAnim[0], flyAnim[1], flyAnim[2], flyAnim[3]);
 		grubSprite = new Grub(grubAnim[0], grubAnim[1], grubAnim[2],
 				grubAnim[3]);
+		teleportSprite = new Teleporter(grubAnim[0]);
 	}
 
 	private Animation createPlayerAnim(Image player1, Image player2,
@@ -292,7 +297,7 @@ public class ResourceManager {
 		return anim;
 	}
 
-	private Animation createFlyAnim(Image img1, Image img2, Image img3) {
+	public Animation createFlyAnim(Image img1, Image img2, Image img3) {
 		Animation anim = new Animation();
 		anim.addFrame(img1, 50);
 		anim.addFrame(img2, 50);

@@ -46,6 +46,9 @@ public class GameManager extends GameCore {
     private GameAction jump;
     private GameAction fall;
     private GameAction exit;
+    private GameAction shoot;
+    
+    private int dir = 1;
     
     private long time;
     private long newtime;
@@ -101,6 +104,7 @@ public class GameManager extends GameCore {
             GameAction.DETECT_INITAL_PRESS_ONLY);
         exit = new GameAction("exit",
             GameAction.DETECT_INITAL_PRESS_ONLY);
+        shoot = new GameAction("shoot", GameAction.DETECT_INITAL_PRESS_ONLY);
 
         inputManager = new InputManager(
             screen.getFullScreenWindow());
@@ -111,6 +115,7 @@ public class GameManager extends GameCore {
         inputManager.mapToKey(fall, KeyEvent.VK_DOWN);
         inputManager.mapToKey(jump, KeyEvent.VK_UP);
         inputManager.mapToKey(exit, KeyEvent.VK_ESCAPE);
+        inputManager.mapToKey(shoot, KeyEvent.VK_S);
     }
 
 
@@ -126,9 +131,11 @@ public class GameManager extends GameCore {
             float velocityY = 0;
             if (moveLeft.isPressed()) {
                 velocityX-=player.getMaxSpeed();
+                dir = -1;
             }
             if (moveRight.isPressed()) {
                 velocityX+=player.getMaxSpeed();
+                dir = 1;
             }
             if (jump.isPressed()) {
                 player.jump(false);
@@ -141,6 +148,25 @@ public class GameManager extends GameCore {
             	player.setVelocityY(player.getVelocityY() + player.getMaxSpeed() * 2);
             	velocityY = player.getVelocityY() + player.getMaxSpeed() * 2;
         	}
+            if (shoot.isPressed()) {
+            	Image[][] images = new Image[1][];
+
+        		// load left-facing images
+        		images[0] = new Image[] { 
+        				loadImage("images/fly1.png"), loadImage("images/fly2.png"),
+        				loadImage("images/fly3.png")};
+
+        		// create creature animations
+        		Animation[] flyAnim = new Animation[4];
+        		flyAnim[0] = resourceManager.createFlyAnim(images[0][0], images[0][1], images[0][2]);
+        			
+				Bullet b = new Bullet(flyAnim[0], flyAnim[0], flyAnim[0], flyAnim[0]);		
+	        	b.shoot(player.getX(), player.getY(), dir);
+				resourceManager.addSprite(map, b, (int) (player.getX() / 64) + (dir * 3), (int) player.getY() / 64);
+	        	resourceManager.reloadMap();
+	        	
+            } 
+            
             player.setVelocityX(velocityX);
             if(velocityX == 0 && velocityY == 0) {
             	newtime = System.currentTimeMillis();
@@ -150,10 +176,15 @@ public class GameManager extends GameCore {
             	}
             }
             else {
-            	player.updateHealth(0.1);
+            	player.updateHealth(0.07);
             	time = System.currentTimeMillis();
             }
+            
+            //Move player back to beginning
+            if(player.getX() >= map.getWidth() * 64 - player.getWidth())
+            	player.setX(0);
         }
+        
 
     }
 
@@ -404,7 +435,6 @@ public class GameManager extends GameCore {
         }
         else if (collisionSprite instanceof Creature) {
             Creature badguy = (Creature)collisionSprite;
-            //System.out.println(canKill);
             if (canKill) {
                 // kill the badguy and make player bounce
                 soundManager.play(boopSound);
@@ -421,6 +451,7 @@ public class GameManager extends GameCore {
             	badguy.setState(Creature.STATE_DYING);
             }
         }
+        
     }
 
 
