@@ -153,8 +153,8 @@ public class GameManager extends GameCore {
 
         		// load left-facing images
         		images[0] = new Image[] { 
-        				loadImage("images/fly1.png"), loadImage("images/fly2.png"),
-        				loadImage("images/fly3.png")};
+        				loadImage("images/cannon1.png"), loadImage("images/cannon2.png"),
+        				loadImage("images/cannon3.png"), loadImage("images/cannon2.png")};
 
         		// create creature animations
         		Animation[] flyAnim = new Animation[4];
@@ -162,7 +162,7 @@ public class GameManager extends GameCore {
         			
 				Bullet b = new Bullet(flyAnim[0], flyAnim[0], flyAnim[0], flyAnim[0]);		
 	        	b.shoot(player.getX(), player.getY(), dir);
-				resourceManager.addSprite(map, b, (int) (player.getX() / 64) + (dir * 3), (int) player.getY() / 64);
+				resourceManager.addSprite(map, b, (int) (player.getX() / 64) + (dir * 2), (int) player.getY() / 64);
 	        	resourceManager.reloadMap();
 	        	
             } 
@@ -183,8 +183,7 @@ public class GameManager extends GameCore {
             //Move player back to beginning
             if(player.getX() >= map.getWidth() * 64 - player.getWidth())
             	player.setX(0);
-        }
-        
+        }       
 
     }
 
@@ -301,8 +300,12 @@ public class GameManager extends GameCore {
                 // collision found, return the Sprite
                 return otherSprite;
             }
-        }
-
+            if(otherSprite instanceof Bullet) {
+            	Bullet b = (Bullet) otherSprite;
+            	b.checkStatus();  	
+            }
+		}
+        
         // no collision found
         return null;
     }

@@ -299,10 +299,10 @@ public class ResourceManager {
 
 	public Animation createFlyAnim(Image img1, Image img2, Image img3) {
 		Animation anim = new Animation();
-		anim.addFrame(img1, 50);
-		anim.addFrame(img2, 50);
-		anim.addFrame(img3, 50);
-		anim.addFrame(img2, 50);
+		anim.addFrame(img1, 110);
+		anim.addFrame(img2, 110);
+		anim.addFrame(img3, 110);
+		anim.addFrame(img2, 110);
 		return anim;
 	}
 

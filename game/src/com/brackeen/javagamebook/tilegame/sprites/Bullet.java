@@ -7,6 +7,8 @@ import com.brackeen.javagamebook.graphics.Animation;
 */
 public class Bullet extends Creature {
 	private static float maxSpeed;
+	public static float originalX= 0;
+	public static long time_dead;
 	
     public Bullet(Animation left, Animation right,
         Animation deadLeft, Animation deadRight)
@@ -15,7 +17,6 @@ public class Bullet extends Creature {
     }
 
     public float getMaxSpeed() {
-    	helper(maxSpeed);
     	return maxSpeed;
     }
 
@@ -23,9 +24,8 @@ public class Bullet extends Creature {
  		this.setX(x);
     	this.setY(y);
         setVelocityX(0);
-        System.out.println(dir);
         helper(-1 * dir);
-        System.out.println(maxSpeed);
+        originalX = this.getX();
     }
     
     private void helper(float max) {
@@ -39,5 +39,15 @@ public class Bullet extends Creature {
     public boolean isFlying() {
         return isAlive();
     }
-
+    
+    public void checkStatus() {
+    	if(Math.abs(originalX - this.getX()) / 64 >= 10) {
+    		this.setState(STATE_DYING);
+    		time_dead = System.currentTimeMillis(); 
+    		originalX = this.getX();
+		}
+		else if(System.currentTimeMillis() - time_dead > 5000 && this.getState() == STATE_DYING) {
+    		this.setState(STATE_DEAD);
+		}
+    }
 }
