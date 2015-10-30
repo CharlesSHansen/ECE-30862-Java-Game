@@ -148,7 +148,7 @@ public class GameManager extends GameCore {
             	player.setVelocityY(player.getVelocityY() + player.getMaxSpeed() * 2);
             	velocityY = player.getVelocityY() + player.getMaxSpeed() * 2;
         	}
-            if (shoot.isPressed()) {
+            if(shoot.isPressed()) {
             	Image[][] images = new Image[1][];
 
         		// load left-facing images
@@ -164,7 +164,6 @@ public class GameManager extends GameCore {
 	        	b.shoot(player.getX(), player.getY(), dir);
 				resourceManager.addSprite(map, b, (int) (player.getX() / 64) + (dir * 2), (int) player.getY() / 64);
 	        	resourceManager.reloadMap();
-	        	
             } 
             
             player.setVelocityX(velocityX);

@@ -111,6 +111,11 @@ public class GameAction {
     public synchronized boolean isPressed() {
         return (getAmount() != 0);
     }
+    
+    public synchronized boolean isHold(){
+    	return (state == STATE_WAITING_FOR_RELEASE);
+    }
+
 
 
     /**

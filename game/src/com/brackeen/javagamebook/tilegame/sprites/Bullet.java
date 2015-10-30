@@ -40,9 +40,13 @@ public class Bullet extends Creature {
         return isAlive();
     }
     
+    public void collideHorizontal() {
+    	this.setState(STATE_DEAD);
+    }
+    
     public void checkStatus() {
     	if(Math.abs(originalX - this.getX()) / 64 >= 10) {
-    		this.setState(STATE_DYING);
+    		this.setState(STATE_DEAD);
     		time_dead = System.currentTimeMillis(); 
     		originalX = this.getX();
 		}
