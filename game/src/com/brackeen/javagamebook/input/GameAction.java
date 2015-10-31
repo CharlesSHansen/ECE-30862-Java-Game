@@ -112,9 +112,6 @@ public class GameAction {
         return (getAmount() != 0);
     }
     
-    public synchronized boolean isHold(){
-    	return (state == STATE_WAITING_FOR_RELEASE);
-    }
 
 
 

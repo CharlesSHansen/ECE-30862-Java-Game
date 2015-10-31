@@ -49,9 +49,14 @@ public class GameManager extends GameCore {
     private GameAction shoot;
     
     private int dir = 1;
+    private int count = 0;
     
     private long time;
     private long newtime;
+    private long time2;
+    private long wait;
+    private long grubTime;
+    private long grubWait;
     
     public void init() {
         super.init();
@@ -104,7 +109,8 @@ public class GameManager extends GameCore {
             GameAction.DETECT_INITAL_PRESS_ONLY);
         exit = new GameAction("exit",
             GameAction.DETECT_INITAL_PRESS_ONLY);
-        shoot = new GameAction("shoot", GameAction.DETECT_INITAL_PRESS_ONLY);
+        shoot = new GameAction("shoot");
+        //shoot = new GameAction("shoot", GameAction.DETECT_INITAL_PRESS_ONLY);
 
         inputManager = new InputManager(
             screen.getFullScreenWindow());
@@ -148,23 +154,72 @@ public class GameManager extends GameCore {
             	player.setVelocityY(player.getVelocityY() + player.getMaxSpeed() * 2);
             	velocityY = player.getVelocityY() + player.getMaxSpeed() * 2;
         	}
-            if(shoot.isPressed()) {
-            	Image[][] images = new Image[1][];
 
-        		// load left-facing images
-        		images[0] = new Image[] { 
-        				loadImage("images/cannon1.png"), loadImage("images/cannon2.png"),
-        				loadImage("images/cannon3.png"), loadImage("images/cannon2.png")};
+            if(!(shoot.isPressed())){
+            	count = 0;
+            }
+            
+            time2 = System.currentTimeMillis();
+            if(shoot.isPressed()){
+            	if(count == 0){
+            		Image[][] images = new Image[1][];
 
-        		// create creature animations
-        		Animation[] flyAnim = new Animation[4];
-        		flyAnim[0] = resourceManager.createFlyAnim(images[0][0], images[0][1], images[0][2]);
-        			
-				Bullet b = new Bullet(flyAnim[0], flyAnim[0], flyAnim[0], flyAnim[0]);		
-	        	b.shoot(player.getX(), player.getY(), dir);
-				resourceManager.addSprite(map, b, (int) (player.getX() / 64) + (dir * 2), (int) player.getY() / 64);
-	        	resourceManager.reloadMap();
-            } 
+            		// load left-facing images
+            		images[0] = new Image[] { 
+            				loadImage("images/cannon1.png"), loadImage("images/cannon2.png"),
+            				loadImage("images/cannon3.png"), loadImage("images/cannon2.png")};
+
+            		// create creature animations
+            		Animation[] flyAnim = new Animation[4];
+            		flyAnim[0] = resourceManager.createFlyAnim(images[0][0], images[0][1], images[0][2]);
+            			
+            		Bullet b = new Bullet(flyAnim[0], flyAnim[0], flyAnim[0], flyAnim[0]);		
+            		b.shoot(player.getX(), player.getY(), dir);
+            		resourceManager.addSprite(map, b, (int) (player.getX() / 64) + (dir * 2), (int) player.getY() / 64);
+            		resourceManager.reloadMap();
+            		count++;
+            		wait = time2;
+            	}
+            	else if((count >= 1 && count < 10) && time2 - wait >= 500){
+            		Image[][] images = new Image[1][];
+
+            		// load left-facing images
+            		images[0] = new Image[] { 
+            				loadImage("images/cannon1.png"), loadImage("images/cannon2.png"),
+            				loadImage("images/cannon3.png"), loadImage("images/cannon2.png")};
+
+            		// create creature animations
+            		Animation[] flyAnim = new Animation[4];
+            		flyAnim[0] = resourceManager.createFlyAnim(images[0][0], images[0][1], images[0][2]);
+            			
+            		Bullet b = new Bullet(flyAnim[0], flyAnim[0], flyAnim[0], flyAnim[0]);		
+            		b.shoot(player.getX(), player.getY(), dir);
+            		resourceManager.addSprite(map, b, (int) (player.getX() / 64) + (dir * 2), (int) player.getY() / 64);
+            		resourceManager.reloadMap();
+            		count++;
+            		wait = time2;
+            	}
+            	else if(count >= 10 && time2 - wait >= 1000){
+            		Image[][] images = new Image[1][];
+
+            		// load left-facing images
+            		images[0] = new Image[] { 
+            				loadImage("images/cannon1.png"), loadImage("images/cannon2.png"),
+            				loadImage("images/cannon3.png"), loadImage("images/cannon2.png")};
+
+            		// create creature animations
+            		Animation[] flyAnim = new Animation[4];
+            		flyAnim[0] = resourceManager.createFlyAnim(images[0][0], images[0][1], images[0][2]);
+            			
+            		Bullet b = new Bullet(flyAnim[0], flyAnim[0], flyAnim[0], flyAnim[0]);		
+            		b.shoot(player.getX(), player.getY(), dir);
+            		resourceManager.addSprite(map, b, (int) (player.getX() / 64) + (dir * 2), (int) player.getY() / 64);
+            		resourceManager.reloadMap();
+            		count = 0;
+            		wait = time2;
+            	}
+            }
+            
             
             player.setVelocityX(velocityX);
             if(velocityX == 0 && velocityY == 0) {
@@ -204,6 +259,7 @@ public class GameManager extends GameCore {
     /**
         Turns on/off drum playback in the midi music (track 1).
     */
+
     public void toggleDrumPlayback() {
         Sequencer sequencer = midiPlayer.getSequencer();
         if (sequencer != null) {
@@ -211,6 +267,7 @@ public class GameManager extends GameCore {
                 !sequencer.getTrackMute(DRUM_TRACK));
         }
     }
+
 
 
     /**
@@ -387,7 +444,11 @@ public class GameManager extends GameCore {
             creature.collideHorizontal();
         }
         if (creature instanceof Player) {
-            checkPlayerCollision((Player)creature, false);
+            checkPlayerCollision((Player)creature, true);
+        }
+        
+        if(creature instanceof Grub){
+        	checkGrubCollision((Grub)creature,true);
         }
 
         // change y
@@ -415,10 +476,29 @@ public class GameManager extends GameCore {
             boolean canKill = (oldY < creature.getY());
             checkPlayerCollision((Player)creature, canKill);
         }
-
+        
     }
 
-
+    public void checkGrubCollision(Grub grub, boolean canKill){
+    	if (!grub.isAlive()) {
+            return;
+        }
+    	Sprite collisionSprite = getSpriteCollision(grub);
+    	
+    	if(collisionSprite instanceof Bullet){
+    		Bullet b = (Bullet)collisionSprite;
+    		if(canKill){
+    			soundManager.play(boopSound);
+    			grub.setState(Creature.STATE_DYING);
+    			b.setState(Creature.STATE_DEAD);
+    		}
+    		else{
+    			
+    		}
+    	}
+    }
+    
+   
     /**
         Checks for Player collision with other Sprites. If
         canKill is true, collisions with Creatures will kill
@@ -440,10 +520,10 @@ public class GameManager extends GameCore {
             if (canKill) {
                 // kill the badguy and make player bounce
                 soundManager.play(boopSound);
-                badguy.setState(Creature.STATE_DYING);
-                player.setY(badguy.getY() - player.getHeight());
-                player.jump(true);
-                player.updateHealth(10.0);
+                player.setState(Creature.STATE_DYING);
+                //player.setY(badguy.getY() - player.getHeight());
+                //player.jump(true);
+                //player.updateHealth(10.0);
             }
             else {
             	//take damage
