@@ -407,6 +407,7 @@ public class GameManager extends GameCore {
                 	//Tries to make a grub shoot when it starts moving, but crashes when grub appears on screen
                 	//Uncomment second to last line and game crashes
                 	//Also this has a bug where if you shoot the grub the bullet comes back and kills you
+                	/*
                 	if(creature instanceof Grub && creature.getVelocityX() != 0){
                 		Image[][] images = new Image[1][];
 
@@ -424,6 +425,8 @@ public class GameManager extends GameCore {
                 		//resourceManager.addSprite(map, b, (int) (creature.getX() / 64) + (-2), (int) creature.getY() / 64);
                 		resourceManager.reloadMap();
                 	}
+                	*/
+                	
                 	
                     updateCreature(creature, elapsedTime);
                 }
@@ -552,7 +555,7 @@ public class GameManager extends GameCore {
         }
         else if (collisionSprite instanceof Creature) {
             Creature badguy = (Creature)collisionSprite;
-            if (canKill) {
+            if (canKill && badguy instanceof Grub) {
                 // kill player if touches the creature
                 soundManager.play(boopSound);
                 player.setState(Creature.STATE_DYING);

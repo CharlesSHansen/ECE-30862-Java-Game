@@ -9,6 +9,7 @@ public class Bullet extends Creature {
 	private static float maxSpeed;
 	public static float originalX= 0;
 	public static long time_dead;
+	private static int N = 12;
 	
     public Bullet(Animation left, Animation right,
         Animation deadLeft, Animation deadRight)
@@ -45,7 +46,7 @@ public class Bullet extends Creature {
     }
     
     public void checkStatus() {
-    	if(Math.abs(originalX - this.getX()) / 64 >= 10) {
+    	if(Math.abs(originalX - this.getX()) / 64 >= N) {
     		this.setState(STATE_DEAD);
     		time_dead = System.currentTimeMillis(); 
     		originalX = this.getX();
