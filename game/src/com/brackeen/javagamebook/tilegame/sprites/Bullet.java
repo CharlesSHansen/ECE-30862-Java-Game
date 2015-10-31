@@ -42,12 +42,7 @@ public class Bullet extends Creature {
     
     public void checkStatus() {
     	if(Math.abs(originalX - this.getX()) / 64 >= 10) {
-    		this.setState(STATE_DYING);
-    		time_dead = System.currentTimeMillis(); 
-    		originalX = this.getX();
-		}
-		else if(System.currentTimeMillis() - time_dead > 5000 && this.getState() == STATE_DYING) {
     		this.setState(STATE_DEAD);
-		}
+        }
     }
 }
