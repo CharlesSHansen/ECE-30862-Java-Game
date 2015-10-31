@@ -50,6 +50,7 @@ public class GameManager extends GameCore {
     
     private int dir = 1;
     private int count = 0;
+    private int updateHealth = 0; //Is 1 when a creature is killed and increments health
     
     private long time;
     private long newtime;
@@ -57,6 +58,8 @@ public class GameManager extends GameCore {
     private long wait;
     private long grubTime;
     private long grubWait;
+    
+    
     
     public void init() {
         super.init();
@@ -214,6 +217,7 @@ public class GameManager extends GameCore {
             		Bullet b = new Bullet(flyAnim[0], flyAnim[0], flyAnim[0], flyAnim[0]);		
             		b.shoot(player.getX(), player.getY(), dir);
             		resourceManager.addSprite(map, b, (int) (player.getX() / 64) + (dir * 2), (int) player.getY() / 64);
+
             		resourceManager.reloadMap();
             		count = 0;
             		wait = time2;
@@ -388,6 +392,7 @@ public class GameManager extends GameCore {
         updateCreature(player, elapsedTime);
         player.update(elapsedTime);
 
+        
         // update other sprites
         Iterator i = map.getSprites();
         while (i.hasNext()) {
@@ -398,12 +403,35 @@ public class GameManager extends GameCore {
                     i.remove();
                 }
                 else {
+                	
+                	//Tries to make a grub shoot when it starts moving, but crashes when grub appears on screen
+                	//Uncomment second to last line and game crashes
+                	//Also this has a bug where if you shoot the grub the bullet comes back and kills you
+                	if(creature instanceof Grub && creature.getVelocityX() != 0){
+                		Image[][] images = new Image[1][];
+
+                		// load left-facing images
+                		images[0] = new Image[] { 
+                				loadImage("images/cannon1.png"), loadImage("images/cannon2.png"),
+                				loadImage("images/cannon3.png"), loadImage("images/cannon2.png")};
+
+                		// create creature animations
+                		Animation[] flyAnim = new Animation[4];
+                		flyAnim[0] = resourceManager.createFlyAnim(images[0][0], images[0][1], images[0][2]);
+                			
+                		Bullet b = new Bullet(flyAnim[0], flyAnim[0], flyAnim[0], flyAnim[0]);		
+                		b.shoot(creature.getX(), creature.getY(), -1);
+                		//resourceManager.addSprite(map, b, (int) (creature.getX() / 64) + (-2), (int) creature.getY() / 64);
+                		resourceManager.reloadMap();
+                	}
+                	
                     updateCreature(creature, elapsedTime);
                 }
             }
             // normal update
             sprite.update(elapsedTime);
         }
+        
     }
 
 
@@ -447,6 +475,7 @@ public class GameManager extends GameCore {
             checkPlayerCollision((Player)creature, true);
         }
         
+        
         if(creature instanceof Grub){
         	checkGrubCollision((Grub)creature,true);
         }
@@ -481,6 +510,7 @@ public class GameManager extends GameCore {
 
     public void checkGrubCollision(Grub grub, boolean canKill){
     	if (!grub.isAlive()) {
+            updateHealth = 0;
             return;
         }
     	Sprite collisionSprite = getSpriteCollision(grub);
@@ -491,9 +521,10 @@ public class GameManager extends GameCore {
     			soundManager.play(boopSound);
     			grub.setState(Creature.STATE_DYING);
     			b.setState(Creature.STATE_DEAD);
+    			updateHealth = 1;
     		}
     		else{
-    			
+    			updateHealth = 0;
     		}
     	}
     }
@@ -510,6 +541,10 @@ public class GameManager extends GameCore {
         if (!player.isAlive()) {
             return;
         }
+        if(updateHealth == 1){
+        	player.updateHealth(10.0);
+        	updateHealth = 0;
+        }
         // check for player collision with other sprites
         Sprite collisionSprite = getSpriteCollision(player);
         if (collisionSprite instanceof PowerUp) {
@@ -518,12 +553,9 @@ public class GameManager extends GameCore {
         else if (collisionSprite instanceof Creature) {
             Creature badguy = (Creature)collisionSprite;
             if (canKill) {
-                // kill the badguy and make player bounce
+                // kill player if touches the creature
                 soundManager.play(boopSound);
                 player.setState(Creature.STATE_DYING);
-                //player.setY(badguy.getY() - player.getHeight());
-                //player.jump(true);
-                //player.updateHealth(10.0);
             }
             else {
             	//take damage
