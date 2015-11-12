@@ -19,8 +19,12 @@ import com.brackeen.javagamebook.tilegame.sprites.*;
 */
 public class GameManager extends GameCore {
 
+	private static String cmdarg;
     public static void main(String[] args) {
-        new GameManager().run();
+    	if(args.length >= 1) {
+        	cmdarg = args[0];
+        }
+    	new GameManager().run();        
     }
 
     // uncompressed, 44100Hz, 16-bit, mono, signed, little-endian
@@ -38,6 +42,7 @@ public class GameManager extends GameCore {
     private ResourceManager resourceManager;
     private Sound prizeSound;
     private Sound boopSound;
+    private Sound shootSound;
     private InputManager inputManager;
     private TileMapRenderer renderer;
 
@@ -50,7 +55,12 @@ public class GameManager extends GameCore {
     
     private int dir = 1;
     private int count = 0;
-    private int updateHealth = 0; //Is 1 when a creature is killed and increments health
+    private int star = 0;
+    private int gas = 0;
+    private float starWalk = 0;
+    private float gasWalk = 0;
+    private float duck = 0;
+    //private int updateHealth = 0; //Is 1 when a creature is killed and increments health
     
     private long time;
     private long newtime;
@@ -58,7 +68,12 @@ public class GameManager extends GameCore {
     private long wait;
     private long grubTime;
     private long grubWait;
+    private long starTime;
+    private long starWait;
+    private long gasTime;
+    private long gasWait;
     
+    private Player porig;
     
     
     public void init() {
@@ -77,13 +92,14 @@ public class GameManager extends GameCore {
             resourceManager.loadImage("background.png"));
 
         // load first map
-        map = resourceManager.loadNextMap();
-
+    	map = resourceManager.cmdArgMap(cmdarg);
         // load sounds
         soundManager = new SoundManager(PLAYBACK_FORMAT);
         prizeSound = soundManager.getSound("sounds/prize.wav");
         boopSound = soundManager.getSound("sounds/boop2.wav");
+        shootSound = soundManager.getSound("sounds/boop2.wav");
 
+        
         // start music
         midiPlayer = new MidiPlayer();
         Sequence sequence =
@@ -135,38 +151,54 @@ public class GameManager extends GameCore {
         }
         
         Player player = (Player)map.getPlayer();
+        porig = player;
         if (player.isAlive()) {
             float velocityX = 0;
             float velocityY = 0;
-            if (moveLeft.isPressed()) {
+            if (moveLeft.isPressed() && duck == 0) {
                 velocityX-=player.getMaxSpeed();
                 dir = -1;
             }
-            if (moveRight.isPressed()) {
+            if (moveRight.isPressed() && duck == 0) {
                 velocityX+=player.getMaxSpeed();
                 dir = 1;
             }
             if (jump.isPressed()) {
-                player.jump(false);
-                if(player.onGround == true) {
-                velocityY = player.getVelocityY() - player.getMaxSpeed() / 2;
-                player.setVelocityY(player.getVelocityY() - player.getMaxSpeed() / 2);
-                }
+            	if(duck == 1){
+            		duck = 0;
+            		porig.duck(0);
+            	}
+            	else{
+            		player.jump(false);
+            		if(player.onGround == true) {
+            			velocityY = player.getVelocityY() - player.getMaxSpeed() / 2;
+            			player.setVelocityY(player.getVelocityY() - player.getMaxSpeed() / 2);
+            		}
+            	}
             }
             if (fall.isPressed()) {
-            	player.setVelocityY(player.getVelocityY() + player.getMaxSpeed() * 2);
-            	velocityY = player.getVelocityY() + player.getMaxSpeed() * 2;
+            	duck = 1;
+            	porig.duck(1);
         	}
 
             if(!(shoot.isPressed())){
             	count = 0;
             }
             
+            gasTime = System.currentTimeMillis();
+            if(gasTime - gasWait >= 1000 || Math.abs(gasWalk - porig.getX()) >= 10 * 64){
+            	gas = 0;
+            	gasTime = 0;
+            	gasWait = 0;
+            	gasWalk = 0;
+            }
+            
             time2 = System.currentTimeMillis();
-            if(shoot.isPressed()){
+            if(shoot.isPressed() && gas == 0){
             	if(count == 0){
             		Image[][] images = new Image[1][];
-
+            		soundManager.play(shootSound);
+            		
             		// load left-facing images
             		images[0] = new Image[] { 
             				loadImage("images/cannon1.png"), loadImage("images/cannon2.png"),
@@ -182,9 +214,11 @@ public class GameManager extends GameCore {
             		resourceManager.reloadMap();
             		count++;
             		wait = time2;
+    
             	}
             	else if((count >= 1 && count < 10) && time2 - wait >= 500){
             		Image[][] images = new Image[1][];
+            		soundManager.play(shootSound);
 
             		// load left-facing images
             		images[0] = new Image[] { 
@@ -201,10 +235,12 @@ public class GameManager extends GameCore {
             		resourceManager.reloadMap();
             		count++;
             		wait = time2;
+
             	}
             	else if(count >= 10 && time2 - wait >= 1000){
             		Image[][] images = new Image[1][];
-
+            		
+            		soundManager.play(shootSound);
             		// load left-facing images
             		images[0] = new Image[] { 
             				loadImage("images/cannon1.png"), loadImage("images/cannon2.png"),
@@ -221,6 +257,7 @@ public class GameManager extends GameCore {
             		resourceManager.reloadMap();
             		count = 0;
             		wait = time2;
+
             	}
             }
             
@@ -228,13 +265,13 @@ public class GameManager extends GameCore {
             player.setVelocityX(velocityX);
             if(velocityX == 0 && velocityY == 0) {
             	newtime = System.currentTimeMillis();
-            	if(newtime - time >= 1000) {
+            	if(newtime - time >= 1000 && player.lasthealth - System.currentTimeMillis() <= 1000) {
             		time = newtime;
                 	player.updateHealth(5.0);
             	}
             }
             else {
-            	player.updateHealth(0.07);
+            	player.updateHealth(0.01);
             	time = System.currentTimeMillis();
             }
             
@@ -395,6 +432,13 @@ public class GameManager extends GameCore {
         
         // update other sprites
         Iterator i = map.getSprites();
+        starTime = System.currentTimeMillis();
+        if(starTime - starWait >= 1000 || Math.abs(starWalk - porig.getX()) >= 10 * 64){
+        	star = 0;
+        	starTime = 0;
+        	starWait = 0;
+        	starWalk = 0;
+        }
         while (i.hasNext()) {
             Sprite sprite = (Sprite)i.next();
             if (sprite instanceof Creature) {
@@ -407,26 +451,49 @@ public class GameManager extends GameCore {
                 	//Tries to make a grub shoot when it starts moving, but crashes when grub appears on screen
                 	//Uncomment second to last line and game crashes
                 	//Also this has a bug where if you shoot the grub the bullet comes back and kills you
-                	/*
-                	if(creature instanceof Grub && creature.getVelocityX() != 0){
-                		Image[][] images = new Image[1][];
-
-                		// load left-facing images
-                		images[0] = new Image[] { 
-                				loadImage("images/cannon1.png"), loadImage("images/cannon2.png"),
-                				loadImage("images/cannon3.png"), loadImage("images/cannon2.png")};
-
-                		// create creature animations
-                		Animation[] flyAnim = new Animation[4];
-                		flyAnim[0] = resourceManager.createFlyAnim(images[0][0], images[0][1], images[0][2]);
-                			
-                		Bullet b = new Bullet(flyAnim[0], flyAnim[0], flyAnim[0], flyAnim[0]);		
-                		b.shoot(creature.getX(), creature.getY(), -1);
-                		//resourceManager.addSprite(map, b, (int) (creature.getX() / 64) + (-2), (int) creature.getY() / 64);
-                		resourceManager.reloadMap();
-                	}
-                	*/
                 	
+                	if(creature instanceof Grub && creature.getState() != Creature.STATE_DEAD && creature.getState() != Creature.STATE_DYING){
+                		if(Math.abs(creature.getX() - porig.getX()) <= 8 * 64) {
+                			Grub g = (Grub) creature;
+                			if(g.firsttime == 0) {
+                				g.setTime(System.currentTimeMillis());
+                			System.out.println("Contact");
+                		}
+                			else if(System.currentTimeMillis() - g.firsttime >= 500 || Math.abs(creature.getX() - porig.getX()) <= 6 * 64) {
+		                		g.startMove();
+                				if(System.currentTimeMillis() - g.lastshot >= 1000 && g.getState() != Creature.STATE_DEAD) {
+                					Image[][] images = new Image[1][];
+                					g.setShot(System.currentTimeMillis());
+			                		// load left-facing images
+			                		images[0] = new Image[] { 
+			                				loadImage("images/cannon1.png"), loadImage("images/cannon2.png"),
+			                				loadImage("images/cannon3.png"), loadImage("images/cannon2.png")};
+			
+			               
+			                		// create creature animations
+			                		Animation[] flyAnim = new Animation[4];
+			                		flyAnim[0] = resourceManager.createFlyAnim(images[0][0], images[0][1], images[0][2]);
+			                			
+			                		Bullet b = new Bullet(flyAnim[0], flyAnim[0], flyAnim[0], flyAnim[0]);	
+			                		int dir = 0;
+			                		if(creature.getX() - player.getX() > 0)
+			                			dir = -1;
+			                		else
+			                			dir = 1;
+			                		b.shoot(creature.getX(), creature.getY(), dir);
+			                		try{
+			                			resourceManager.addSprite(map, b, (int) (creature.getX() / 64) + (dir * 2), (int) creature.getY() / 64);
+			                			break;
+			                		}
+			                		catch (Exception e) {
+			                			e.printStackTrace();
+			                		}
+			                		resourceManager.reloadMap();
+	                				}
+                			}
+                		}
+                	
+                	}
                 	
                     updateCreature(creature, elapsedTime);
                 }
@@ -474,10 +541,6 @@ public class GameManager extends GameCore {
             }
             creature.collideHorizontal();
         }
-        if (creature instanceof Player) {
-            checkPlayerCollision((Player)creature, true);
-        }
-        
         
         if(creature instanceof Grub){
         	checkGrubCollision((Grub)creature,true);
@@ -505,7 +568,7 @@ public class GameManager extends GameCore {
             creature.collideVertical();
         }
         if (creature instanceof Player) {
-            boolean canKill = (oldY < creature.getY());
+            boolean canKill = true;//(oldY < creature.getY() - 100);
             checkPlayerCollision((Player)creature, canKill);
         }
         
@@ -513,7 +576,7 @@ public class GameManager extends GameCore {
 
     public void checkGrubCollision(Grub grub, boolean canKill){
     	if (!grub.isAlive()) {
-            updateHealth = 0;
+            //updateHealth = 0;
             return;
         }
     	Sprite collisionSprite = getSpriteCollision(grub);
@@ -521,13 +584,11 @@ public class GameManager extends GameCore {
     	if(collisionSprite instanceof Bullet){
     		Bullet b = (Bullet)collisionSprite;
     		if(canKill){
-    			soundManager.play(boopSound);
+    			soundManager.play(prizeSound);
     			grub.setState(Creature.STATE_DYING);
     			b.setState(Creature.STATE_DEAD);
-    			updateHealth = 1;
-    		}
-    		else{
-    			updateHealth = 0;
+    			porig.updateHealth(10.0);
+    			//updateHealth = 1;
     		}
     	}
     }
@@ -544,28 +605,38 @@ public class GameManager extends GameCore {
         if (!player.isAlive()) {
             return;
         }
-        if(updateHealth == 1){
-        	player.updateHealth(10.0);
-        	updateHealth = 0;
-        }
         // check for player collision with other sprites
         Sprite collisionSprite = getSpriteCollision(player);
         if (collisionSprite instanceof PowerUp) {
-            acquirePowerUp((PowerUp)collisionSprite);
+            acquirePowerUp((PowerUp)collisionSprite,player);
         }
         else if (collisionSprite instanceof Creature) {
             Creature badguy = (Creature)collisionSprite;
-            if (canKill && badguy instanceof Grub) {
-                // kill player if touches the creature
-                soundManager.play(boopSound);
+            if (canKill && badguy instanceof Grub && star != 1) {
+                // kill the badguy and make player bounce
+                soundManager.play(prizeSound);
                 player.setState(Creature.STATE_DYING);
+                duck = 0;
             }
-            else {
+            else if(duck == 0){
             	//take damage
-            	player.updateHealth(-5.0);
-            	if(player.getHealth() == 0) 
+            	if(star != 1){
+            		player.updateHealth(-5.0);
+            	}
+            	if(badguy instanceof Bullet){
+            		badguy.setState(Creature.STATE_DEAD);
+            	}
+            	player.setLastHealth(System.currentTimeMillis());
+            	if(player.getHealth() == 0) {
             		player.setState(Creature.STATE_DYING);
-            	badguy.setState(Creature.STATE_DYING);
+            		soundManager.play(boopSound);
+            	}
+              	if(badguy instanceof Bullet){
+            		badguy.setState(Creature.STATE_DEAD);
+            	}
+              	else{
+              		badguy.setState(Creature.STATE_DYING);
+              	}
             }
         }
         
@@ -576,13 +647,16 @@ public class GameManager extends GameCore {
         Gives the player the speicifed power up and removes it
         from the map.
     */
-    public void acquirePowerUp(PowerUp powerUp) {
+    public void acquirePowerUp(PowerUp powerUp,Player player) {
         // remove it from the map
         map.removeSprite(powerUp);
 
         if (powerUp instanceof PowerUp.Star) {
-            // do something here, like give the player points
+        	starTime = System.currentTimeMillis();
+        	starWait = System.currentTimeMillis();
+        	starWalk = player.getX();
             soundManager.play(prizeSound);
+            star = 1;
         }
         else if (powerUp instanceof PowerUp.Music) {
             // change the music
@@ -594,6 +668,19 @@ public class GameManager extends GameCore {
             soundManager.play(prizeSound,
                 new EchoFilter(2000, .7f), false);
             map = resourceManager.loadNextMap();
+        }
+        else if(powerUp instanceof PowerUp.Mushroom){
+        	player.updateHealth(5.0);
+        	soundManager.play(prizeSound);
+        }
+        else if(powerUp instanceof PowerUp.Explode){
+        	player.updateHealth(-10.0);
+        }
+        else if(powerUp instanceof PowerUp.Gas){
+        	gasTime = System.currentTimeMillis();
+        	gasWait = System.currentTimeMillis();
+        	gasWalk = player.getX();
+            gas = 1;
         }
     }
 

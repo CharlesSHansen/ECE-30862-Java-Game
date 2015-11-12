@@ -27,6 +27,9 @@ public class ResourceManager {
 	private Sprite grubSprite;
 	private Sprite flySprite;
 	private Sprite teleportSprite;
+	private Sprite mushroomSprite;
+	private Sprite gasSprite;
+	private Sprite expSprite;
 
 	/**
 	 * Creates a new ResourceManager with the specified GraphicsConfiguration.
@@ -92,6 +95,17 @@ public class ResourceManager {
 
 		return map;
 	}
+	
+	public TileMap cmdArgMap(String arg) {
+		TileMap map = null;
+		try {
+			map = loadMap("maps/" + arg);
+			
+		}	catch (IOException ex) {
+			map = loadNextMap();
+		}
+		return map;
+	}
 
 	public TileMap reloadMap() {
 		try {
@@ -151,7 +165,15 @@ public class ResourceManager {
 					addSprite(newMap, flySprite, x, y);
 				} else if (ch == 'T') {
 					addSprite(newMap, teleportSprite, x, y);
+				} else if (ch == 'M') {
+					addSprite(newMap, mushroomSprite, x, y);
+				} else if (ch == 'Y') {
+					addSprite(newMap, gasSprite, x, y);
+				} else if (ch == 'Z') {
+					addSprite(newMap, expSprite, x, y);
 				}
+				
+				
 				
 			}
 		}
@@ -337,6 +359,22 @@ public class ResourceManager {
 		anim.addFrame(loadImage("music3.png"), 150);
 		anim.addFrame(loadImage("music2.png"), 150);
 		musicSprite = new PowerUp.Music(anim);
+		
+		anim = new Animation();
+		anim.addFrame(loadImage("powerup1.png"), 100);
+		anim.addFrame(loadImage("powerup2.png"), 100);
+		anim.addFrame(loadImage("powerup3.png"), 100);
+		anim.addFrame(loadImage("powerup4.png"), 100);
+		mushroomSprite = new PowerUp.Mushroom(anim);
+		
+		anim = new Animation();
+		anim.addFrame(loadImage("blackBlock.png"), 100);
+		gasSprite = new PowerUp.Gas(anim);
+		
+		anim = new Animation();
+		anim.addFrame(loadImage("swords.png"), 100);
+		expSprite = new PowerUp.Explode(anim);
 	}
+	
 
 }

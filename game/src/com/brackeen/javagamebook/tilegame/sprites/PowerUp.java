@@ -37,6 +37,11 @@ public abstract class PowerUp extends Sprite {
         }
     }
 
+    public static class Mushroom extends PowerUp {
+    	public Mushroom(Animation anim){
+    		super(anim);
+    	}
+    }
 
     /**
         A Music PowerUp. Changes the game music.
@@ -46,6 +51,19 @@ public abstract class PowerUp extends Sprite {
             super(anim);
         }
     }
+    
+    public static class Explode extends PowerUp {
+        public Explode(Animation anim) {
+            super(anim);
+        }
+    }
+    
+    public static class Gas extends PowerUp {
+        public Gas(Animation anim) {
+            super(anim);
+        }
+    }
+    
 
 
     /**

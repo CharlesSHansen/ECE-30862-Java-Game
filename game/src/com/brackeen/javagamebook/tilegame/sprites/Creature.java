@@ -137,6 +137,20 @@ public abstract class Creature extends Sprite {
         setVelocityY(0);
     }
 
+    public void duck(int i){
+    	if(i == 1 && anim == right){
+    		anim = deadRight;
+    	}
+    	else if(i == 1 && anim == left){
+    		anim = deadLeft;
+    	}
+    	else if(i == 0 && anim == deadRight){
+    		anim = right;
+    	}
+    	else if(i == 0 && anim == deadLeft){
+    		anim = left;
+    	}
+    }
 
     /**
         Updates the animaton for this creature.

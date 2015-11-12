@@ -1,7 +1,5 @@
 package com.brackeen.javagamebook.tilegame.sprites;
 
-import java.awt.Image;
-
 import com.brackeen.javagamebook.graphics.Animation;
 
 /**
@@ -9,7 +7,9 @@ import com.brackeen.javagamebook.graphics.Animation;
 */
 public class Grub extends Creature {
 
-
+	public static long firsttime = 0;
+	public static long lastshot = 0;
+	public static float move = 0;
     public Grub(Animation left, Animation right,
         Animation deadLeft, Animation deadRight)
     {
@@ -18,7 +18,18 @@ public class Grub extends Creature {
 
 
     public float getMaxSpeed() {
-        return 0.05f;
+        return move;
     }
 
+    public void setTime(long t) {
+    	firsttime = t;
+    }
+    
+    public void startMove() {
+    	move = 0.05f;
+    }
+    
+    public void setShot(long t) {
+    	lastshot = t;    	
+    }
 }

@@ -11,6 +11,7 @@ public class Player extends Creature {
 
     public boolean onGround;
     public double health = 20;
+    public long lasthealth = 0;
     
     public Player(Animation left, Animation right,
         Animation deadLeft, Animation deadRight)
@@ -74,4 +75,9 @@ public class Player extends Creature {
     	if (health < 0)
     		health = 0;
     }
+    
+    public void setLastHealth(long t) {
+    	lasthealth = t;
+    }
+    
 }
